@@ -1,13 +1,15 @@
-# LUPA Atlas-0.1 version｜Lunar Soil Particle Morphology Database
+# LUPA Atlas｜Lunar Soil Particle Morphology Database
 
-Moon soil particle morphology database prototype for scientific research presentation and achievements exhibition, featuring particle data browsing, 3D model inspection, automatic classification results, and statistical analysis.
+Moon soil particle morphology database for browsing the real STL meshes stored in
+`dataset/`. The web viewer uses compact meshes derived from those source files so
+the static site remains practical to load.
 
 ## Function
 
-- Browse particle specimens by category, number, and morphological parameters
-- Interactive 3D granular window: rotate, zoom, and switch between surface/point cloud/CT modes
-- Classification confidence, confusion matrix, and feature contribution display
-- Analysis of morphological parameter associations, category composition, and parameter ranges
+- Browse 20 real particle meshes by category and file number
+- Interactive 3D viewer: rotate, zoom, clip, and switch between surface, point cloud, and wireframe modes
+- Trace every browser record back to its source STL filename
+- Inspect the dataset's category and file composition
 - Responsive layout for desktop and mobile devices
 
 ## Run Locally
@@ -23,11 +25,26 @@ npm run dev
 
 ## Data explanation
 
-The current version is a prototype intended for scientific demonstration. Some individual particle numbers and parameters are displayed as sample data. The official version is scheduled to be released at the end of July 2026, at which time three-dimensional data with resolutions of 1 μm and 14 nm will be made publicly available.
+The 20 ASCII STL files in `dataset/` are the current source of truth. Filename
+prefixes are indexed as follows: `JJW` (胶结物), `BLZ` (玻璃珠), `YX` (岩屑),
+and `DKW` (单矿物).
+
+The site does not currently infer particle dimensions or morphology descriptors
+from the meshes. The previous demonstration IDs, shape parameters, classifier
+scores, and synthetic statistics have been removed.
+
+Browser assets in `public/models/` are normalized, lightweight derivatives used
+only for visualization; the source STL files are unchanged. If source models are
+updated, regenerate previews with:
+
+```bash
+python3 tools/build_mesh_assets.py
+```
 
 ## TODO
-- Open-source Representative Granular Data
-- Online Morphology Characteristic Analysis Function
+
+- Connect an authoritative parameter table when it becomes available
+- Add verified morphology and classification analysis
 
 ## Aknowledgements
 - The basic evaluation procedure originates from LUPA: Lunar Regolith Particle Analyzer.
