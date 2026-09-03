@@ -51,8 +51,47 @@ const classCount = (className: ParticleClass) => particles.filter((particle) => 
 const featured = [particles[13], particles[1], particles[16]];
 const assetBase = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
-type MeshData = { vertices: Float32Array; indices: Uint32Array };
+type MeshData = { vertices: Float32Array; indices: Uint32Array; faceNormals: Float32Array };
 const meshCache = new Map<string, Promise<MeshData>>();
+
+function prepareMesh(vertices: Float32Array, indices: Uint32Array): MeshData {
+  const faceNormals = new Float32Array(indices.length);
+  let signedVolume = 0;
+
+  for (let index = 0; index < indices.length; index += 3) {
+    const a = indices[index] * 3;
+    const b = indices[index + 1] * 3;
+    const c = indices[index + 2] * 3;
+    const ax = vertices[a];
+    const ay = vertices[a + 1];
+    const az = vertices[a + 2];
+    const bx = vertices[b];
+    const by = vertices[b + 1];
+    const bz = vertices[b + 2];
+    const cx = vertices[c];
+    const cy = vertices[c + 1];
+    const cz = vertices[c + 2];
+    const ux = bx - ax;
+    const uy = by - ay;
+    const uz = bz - az;
+    const vx = cx - ax;
+    const vy = cy - ay;
+    const vz = cz - az;
+    const nx = uy * vz - uz * vy;
+    const ny = uz * vx - ux * vz;
+    const nz = ux * vy - uy * vx;
+    const length = Math.hypot(nx, ny, nz) || 1;
+    faceNormals[index] = nx / length;
+    faceNormals[index + 1] = ny / length;
+    faceNormals[index + 2] = nz / length;
+    signedVolume += ax * (by * cz - bz * cy) + ay * (bz * cx - bx * cz) + az * (bx * cy - by * cx);
+  }
+
+  if (signedVolume < 0) {
+    for (let index = 0; index < faceNormals.length; index += 1) faceNormals[index] *= -1;
+  }
+  return { vertices, indices, faceNormals };
+}
 
 function loadMesh(path: string): Promise<MeshData> {
   const url = `${assetBase}${path}`;
@@ -69,10 +108,10 @@ function loadMesh(path: string): Promise<MeshData> {
     const vertexEnd = 8 + vertexCount * 3 * 4;
     const expectedLength = vertexEnd + indexCount * 4;
     if (expectedLength !== buffer.byteLength) throw new Error("模型预览文件格式错误");
-    return {
-      vertices: new Float32Array(buffer.slice(8, vertexEnd)),
-      indices: new Uint32Array(buffer.slice(vertexEnd)),
-    };
+    return prepareMesh(
+      new Float32Array(buffer.slice(8, vertexEnd)),
+      new Uint32Array(buffer.slice(vertexEnd)),
+    );
   });
   meshCache.set(url, request);
   return request;
@@ -141,6 +180,9 @@ function MeshCanvas({
     const sinP = Math.sin(current.pitch);
     const scale = Math.min(width, height) * (interactive ? 0.39 : 0.42) * current.zoom;
     const projected = new Float32Array(mesh.vertices.length);
+    let minX = Number.POSITIVE_INFINITY;
+    let maxX = Number.NEGATIVE_INFINITY;
+    let maxY = Number.NEGATIVE_INFINITY;
 
     for (let index = 0; index < mesh.vertices.length; index += 3) {
       const x = mesh.vertices[index];
@@ -152,7 +194,26 @@ function MeshCanvas({
       projected[index] = width / 2 + rotatedX * scale;
       projected[index + 1] = height / 2 - rotatedY * scale;
       projected[index + 2] = y * sinP + rotatedZ * cosP;
+      minX = Math.min(minX, projected[index]);
+      maxX = Math.max(maxX, projected[index]);
+      maxY = Math.max(maxY, projected[index + 1]);
     }
+
+    const shadowWidth = Math.max(24, (maxX - minX) * 0.7);
+    const shadowHeight = Math.max(5, shadowWidth * 0.085);
+    const shadowY = Math.min(height - shadowHeight, maxY + shadowHeight * 0.5);
+    context.save();
+    context.translate((minX + maxX) / 2, shadowY);
+    context.scale(shadowWidth, shadowHeight);
+    const shadow = context.createRadialGradient(0, 0, 0, 0, 0, 0.5);
+    shadow.addColorStop(0, interactive ? "rgba(0, 0, 0, .3)" : "rgba(52, 43, 34, .2)");
+    shadow.addColorStop(0.58, interactive ? "rgba(0, 0, 0, .13)" : "rgba(52, 43, 34, .08)");
+    shadow.addColorStop(1, "rgba(0, 0, 0, 0)");
+    context.fillStyle = shadow;
+    context.beginPath();
+    context.arc(0, 0, 0.5, 0, Math.PI * 2);
+    context.fill();
+    context.restore();
 
     const clipAt = -1.35 + (slice / 100) * 2.7;
     if (mode === "points") {
@@ -164,51 +225,70 @@ function MeshCanvas({
         const depth = projected[offset + 2];
         if (slice < 100 && depth > clipAt) continue;
         const light = Math.max(0, Math.min(1, (depth + 1.3) / 2.6));
-        context.fillStyle = `rgba(43,228,255,${0.22 + light * 0.7})`;
+        context.fillStyle = `rgba(${Math.round(54 + light * 45)},${Math.round(155 + light * 73)},${Math.round(179 + light * 76)},${0.2 + light * 0.76})`;
         context.beginPath();
-        context.arc(projected[offset], projected[offset + 1], interactive ? 1.45 : 1.05, 0, Math.PI * 2);
+        context.arc(projected[offset], projected[offset + 1], (interactive ? 1.15 : 0.9) + light * 0.7, 0, Math.PI * 2);
         context.fill();
       }
       return;
     }
 
-    const triangles: { a: number; b: number; c: number; depth: number; light: number }[] = [];
+    const triangles: { a: number; b: number; c: number; depth: number; shade: number; specular: number; rim: number; grain: number }[] = [];
     for (let index = 0; index < mesh.indices.length; index += 3) {
       const a = mesh.indices[index] * 3;
       const b = mesh.indices[index + 1] * 3;
       const c = mesh.indices[index + 2] * 3;
       const depth = (projected[a + 2] + projected[b + 2] + projected[c + 2]) / 3;
       if (slice < 100 && depth > clipAt) continue;
-      const ux = projected[b] - projected[a];
-      const uy = projected[b + 1] - projected[a + 1];
-      const vx = projected[c] - projected[a];
-      const vy = projected[c + 1] - projected[a + 1];
-      const facing = ux * vy - uy * vx;
+
+      const nx = mesh.faceNormals[index];
+      const ny = mesh.faceNormals[index + 1];
+      const nz = mesh.faceNormals[index + 2];
+      const rotatedNX = nx * cosY - nz * sinY;
+      const rotatedNZ = nx * sinY + nz * cosY;
+      const rotatedNY = ny * cosP - rotatedNZ * sinP;
+      const normalZ = ny * sinP + rotatedNZ * cosP;
+      if (mode === "surface" && normalZ < -0.025) continue;
+
+      const diffuse = Math.max(0, rotatedNX * -0.46 + rotatedNY * 0.62 + normalZ * 0.64);
+      const halfLight = Math.max(0, rotatedNX * -0.25 + rotatedNY * 0.34 + normalZ * 0.91);
+      const specular = Math.pow(halfLight, 22);
+      const rim = Math.pow(1 - Math.max(0, normalZ), 2.2);
       const depthLight = Math.max(0, Math.min(1, (depth + 1.25) / 2.5));
-      const light = Math.max(0.14, Math.min(1, 0.3 + depthLight * 0.5 + Math.min(Math.abs(facing) / 140, 0.2)));
-      triangles.push({ a, b, c, depth, light });
+      const shade = Math.min(1.15, 0.28 + diffuse * 0.68 + depthLight * 0.1);
+      const grain = 0.94 + ((index / 3) % 7) * 0.012;
+      triangles.push({ a, b, c, depth, shade, specular, rim, grain });
     }
     triangles.sort((a, b) => a.depth - b.depth);
 
     if (mode === "wireframe") {
-      context.strokeStyle = "rgba(66, 220, 241, .42)";
-      context.lineWidth = 0.65;
-      context.beginPath();
-      for (const triangle of triangles) {
-        context.moveTo(projected[triangle.a], projected[triangle.a + 1]);
-        context.lineTo(projected[triangle.b], projected[triangle.b + 1]);
-        context.lineTo(projected[triangle.c], projected[triangle.c + 1]);
-        context.closePath();
+      for (let layer = 0; layer < 3; layer += 1) {
+        context.strokeStyle = `rgba(${65 + layer * 15},${165 + layer * 28},${190 + layer * 28},${0.14 + layer * 0.18})`;
+        context.lineWidth = 0.5 + layer * 0.18;
+        context.beginPath();
+        for (const triangle of triangles) {
+          const depthLayer = Math.max(0, Math.min(2, Math.floor(((triangle.depth + 1.3) / 2.6) * 3)));
+          if (depthLayer !== layer) continue;
+          context.moveTo(projected[triangle.a], projected[triangle.a + 1]);
+          context.lineTo(projected[triangle.b], projected[triangle.b + 1]);
+          context.lineTo(projected[triangle.c], projected[triangle.c + 1]);
+          context.closePath();
+        }
+        context.stroke();
       }
-      context.stroke();
       return;
     }
 
     for (const triangle of triangles) {
-      const value = Math.round(52 + triangle.light * 172);
-      context.fillStyle = `rgb(${value},${Math.max(45, value - 7)},${Math.max(39, value - 15)})`;
+      const base = interactive ? [112, 125, 134] : [157, 151, 140];
+      const highlight = triangle.specular * (interactive ? 105 : 82);
+      const rimLight = triangle.rim * (interactive ? 26 : 13);
+      const red = Math.min(255, base[0] * triangle.shade * triangle.grain + highlight + rimLight * 0.25);
+      const green = Math.min(255, base[1] * triangle.shade * triangle.grain + highlight + rimLight * 0.72);
+      const blue = Math.min(255, base[2] * triangle.shade * triangle.grain + highlight + rimLight);
+      context.fillStyle = `rgb(${Math.round(red)},${Math.round(green)},${Math.round(blue)})`;
       context.strokeStyle = context.fillStyle;
-      context.lineWidth = 0.55;
+      context.lineWidth = 0.7;
       context.beginPath();
       context.moveTo(projected[triangle.a], projected[triangle.a + 1]);
       context.lineTo(projected[triangle.b], projected[triangle.b + 1]);
@@ -217,6 +297,18 @@ function MeshCanvas({
       context.fill();
       context.stroke();
     }
+
+    context.strokeStyle = interactive ? "rgba(111, 206, 218, .11)" : "rgba(49, 42, 35, .11)";
+    context.lineWidth = interactive ? 0.48 : 0.4;
+    context.beginPath();
+    const textureStep = interactive ? 2 : 3;
+    for (let index = 0; index < triangles.length; index += textureStep) {
+      const triangle = triangles[index];
+      context.moveTo(projected[triangle.a], projected[triangle.a + 1]);
+      context.lineTo(projected[triangle.b], projected[triangle.b + 1]);
+      context.lineTo(projected[triangle.c], projected[triangle.c + 1]);
+    }
+    context.stroke();
   }, [interactive, mesh, mode, slice]);
 
   useEffect(() => {

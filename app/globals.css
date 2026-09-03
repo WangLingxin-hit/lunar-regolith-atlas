@@ -60,6 +60,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, canvas:focus-vi
 
 .mesh-frame { position: relative; overflow: hidden; }
 .mesh-frame canvas { display: block; width: 100%; height: 100%; }
+.hero-model::after, .catalog-model::after, .viewer-model::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+.hero-model::after { background: radial-gradient(circle at 30% 22%, rgba(255,255,255,.28), transparent 42%), radial-gradient(ellipse at 50% 88%, transparent 50%, rgba(96,77,57,.08) 100%); }
+.catalog-model::after { box-shadow: inset 0 18px 35px rgba(255,255,255,.2), inset 0 -18px 32px rgba(91,72,52,.07); }
+.viewer-model::after { z-index: 2; background: radial-gradient(circle at 31% 20%, rgba(165,232,244,.1), transparent 42%), radial-gradient(circle at 50% 48%, transparent 45%, rgba(0,0,0,.2) 100%); }
 .mesh-frame.interactive canvas { cursor: grab; touch-action: none; }
 .mesh-frame.interactive canvas:active { cursor: grabbing; }
 .mesh-status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: #8a989f; font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; }
