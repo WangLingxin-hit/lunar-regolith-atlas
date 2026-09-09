@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 
-type PageKey = "home" | "browse" | "model" | "classify" | "stats" | "about";
+// tab identified, "about"-group explaination and reasearch target
+type PageKey = "home" | "browse" | "model" | "classify" | "stats" | "about" | "application";
 type ParticleClass = "胶结物" | "玻璃珠" | "岩屑" | "单矿物";
 type ViewMode = "surface" | "points" | "wireframe";
 
@@ -378,8 +380,9 @@ function MeshCanvas({
   );
 }
 
+// add navigation button
 const navItems: { key: PageKey; label: string }[] = [
-  { key: "browse", label: "数据浏览" }, { key: "model", label: "三维模型" }, { key: "classify", label: "分类索引" }, { key: "stats", label: "数据概览" }, { key: "about", label: "关于项目" },
+  { key: "browse", label: "数据浏览" }, { key: "model", label: "三维模型" }, { key: "classify", label: "分类索引" }, { key: "stats", label: "数据概览" }, { key: "about", label: "关于项目" }, {key: "application", label: "应用推广"},
 ];
 
 function Header({ active, onNavigate }: { active: PageKey; onNavigate: (key: PageKey) => void }) {
@@ -401,7 +404,7 @@ function HomePage({ onNavigate }: { onNavigate: (key: PageKey) => void }) {
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  return <><section className="hero page-enter"><div className="hero-copy"><p className="eyebrow">LUNAR REGOLITH · STL DATASET</p><h1>查看月壤颗粒的<br />真实三维形貌</h1><div className="hero-actions"><button className="primary-button" onClick={() => onNavigate("browse")}>浏览颗粒数据 <span>→</span></button><button className="text-button" onClick={() => onNavigate("about")}>关于项目</button></div><div className="hero-metrics" aria-label="数据集概览"><div><strong>20</strong><span>STL 模型</span></div><div><strong>4</strong><span>颗粒类别</span></div><div><strong>3</strong><span>显示模式</span></div></div></div><div className="hero-archive"><MeshCanvas particle={heroParticle} autoRotate className="hero-model" /><div className="specimen-label label-1"><i /> {heroParticle.id}</div><div className="specimen-label label-2">SPECIMEN · {heroParticle.sourceFile}</div><div className="folio"><b>01</b><span>PARTICLE</span></div></div></section><section className="home-index"><p className="section-kicker">DATASET INDEX / 数据索引</p><div className="index-grid">{[["01", "数据浏览", "按编号与类别浏览颗粒模型。", "browse"], ["02", "三维模型", "旋转、缩放并观察颗粒表面。", "model"], ["03", "分类索引", "浏览四类颗粒的样本构成。", "classify"], ["04", "数据概览", "查看颗粒数量与类别分布。", "stats"]].map(([number, title, copy, key]) => <button key={number} className="index-card" onClick={() => onNavigate(key as PageKey)}><span>{number}</span><h2>{title}</h2><p>{copy}</p><b>进入档案 →</b></button>)}</div></section></>;
+  return <><section className="hero page-enter"><div className="hero-copy"><p className="eyebrow">LUNAR REGOLITH · STL DATASET</p><h1>月壤颗粒<br />三维形貌数据库</h1><div className="hero-actions"><button className="primary-button" onClick={() => onNavigate("browse")}>浏览颗粒数据 <span>→</span></button><button className="text-button" onClick={() => onNavigate("about")}>关于项目</button></div></div><div className="hero-archive"><MeshCanvas particle={heroParticle} autoRotate className="hero-model" /><div className="specimen-label label-1"><i /> {heroParticle.id}</div><div className="specimen-label label-2">SPECIMEN · {heroParticle.sourceFile}</div><div className="folio"><b>01</b><span>PARTICLE</span></div></div></section><section className="home-index"><p className="section-kicker">DATASET INDEX / 数据索引</p><div className="index-grid">{[["01", "数据浏览", "按编号与类别浏览颗粒模型。", "browse"], ["02", "三维模型", "旋转、缩放并观察颗粒表面。", "model"], ["03", "分类索引", "浏览四类颗粒的样本构成。", "classify"], ["04", "数据概览", "查看颗粒数量与类别分布。", "stats"]].map(([number, title, copy, key]) => <button key={number} className="index-card" onClick={() => onNavigate(key as PageKey)}><span>{number}</span><h2>{title}</h2><p>{copy}</p><b>进入档案 →</b></button>)}</div></section></>;
 }
 
 function BrowsePage({ onSelect }: { onSelect: (particle: Particle) => void }) {
@@ -435,10 +438,79 @@ function AboutPage() {
   return <section className="content-page about-page"><PageIntro index="05" eyebrow="LUNAR PARTICLE ATLAS / 项目简介" title="月壤颗粒三维形貌图谱" copy="以数字模型呈现不同类别月壤颗粒的表面结构与形貌差异。" /><div className="method-flow page-enter">{[["01", "颗粒浏览", "按编号和类别检索月壤颗粒。"], ["02", "三维观察", "通过旋转和缩放观察颗粒表面。"], ["03", "多模式显示", "在表面、点云和线框视图之间切换。"], ["04", "样本对比", "比较不同颗粒的整体轮廓与局部结构。"]].map(([number, title, copy]) => <article key={number}><span>{number}</span><h2>{title}</h2><p>{copy}</p></article>)}</div><div className="about-columns"><article><p className="section-kicker">MORPHOLOGY</p><h2>观察颗粒的三维形貌</h2><p>不同成因与演化过程会在颗粒轮廓、棱角和表面起伏中留下形貌特征。三维模型提供了更完整的空间观察视角。</p></article><article><p className="section-kicker">SPECIMEN COLLECTION</p><h2>四类颗粒样本</h2><p>图谱收录胶结物、玻璃珠、岩屑和单矿物四类颗粒，可通过编号索引快速切换和对照观察。</p></article></div></section>;
 }
 
+const applications = [
+  {
+    id: "robotics", label: "LUNAR ROBOTICS", title: "支撑未来月面智能作业",
+    copy: "将真实颗粒形貌及其物性推演引入 GPU 并行环境下的机器人学作业仿真，为月面挖掘等智能作业提供颗粒环境基础，支撑机器人与月壤相互作用的模拟及作业策略研究。",
+    tags: ["GPU 并行仿真", "机器人作业", "颗粒物性"],
+    kind: "video", file: "digger.mp4", caption: "月面挖掘机器人作业仿真演示",
+  },
+  {
+    id: "drilling", label: "SUBSURFACE EXPLORATION", title: "支撑极区月壤剖面物性测试与仿真",
+    copy: "面向极区月壤剖面物性测试，将真实月壤形貌纳入颗粒行为仿真，以更精准地描述钻进过程中的颗粒运动与排屑行为，支撑月背剖面钻进过程中延迟排屑等现象的复现与机理分析。",
+    tags: ["剖面物性", "钻进仿真", "延迟排屑"],
+    kind: "video", file: "drilling.mp4", caption: "月壤剖面钻进与颗粒排屑仿真演示",
+  },
+  {
+    id: "contacts", label: "GRANULAR MECHANICS", title: "支撑月壤颗粒群物性推演与接触特性分析",
+    copy: "考虑真实月壤颗粒的形貌特征，开展颗粒群接触特性与流动特性分析，关联细观接触行为与宏观物性响应，构建宏—细观映射关系，为颗粒群物性推演提供基础。",
+    tags: ["接触特性", "颗粒流动", "宏—细观映射"],
+    kind: "image", file: "free_fall.png", caption: "颗粒群运动与接触特性研究示意",
+  },
+  {
+    id: "thermal", label: "THERMOPHYSICAL PROPERTIES", title: "支撑月壤颗粒群热物性特征推演",
+    copy: "以真实颗粒形貌为基础，研究颗粒群的传热行为，并推广至不同区位与深度条件下的月壤热导等热物性特征推演，为未来月球资源利用与开发提供物性依据。",
+    tags: ["热物性", "区位与深度", "资源利用"],
+    kind: "image", file: "heat_field.png", caption: "月壤颗粒群温度场与传热研究示意",
+  },
+  {
+    id: "ice", label: "WATER ICE IN REGOLITH", title: "支撑永久阴影区月壤水冰覆膜特征构建及物性推演",
+    copy: "面向月球永久阴影区，以真实月壤颗粒形貌为基础构建水冰覆膜特征，进一步研究覆膜条件下的颗粒物性，为含冰月壤的物性推演及后续资源利用研究提供支撑。",
+    tags: ["永久阴影区", "水冰覆膜", "含冰月壤物性"],
+    kind: "image", file: "水冰覆膜.png", caption: "月壤颗粒水冰覆膜特征示意",
+  },
+] as const;
+
+function ApplicationPage() {
+  return (
+    <section className="content-page application-page">
+      <PageIntro index="06" eyebrow="FUTURE APPLICATIONS / 应用推广" title="从颗粒形貌走向月面应用" copy="基于已有研究，面向智能作业、剖面探测、颗粒力学、热物性与水冰覆膜，拓展真实月壤颗粒形貌数据的应用。" />
+      <div className="application-list">
+        {applications.map((item, index) => (
+          <article className="application-card page-enter" key={item.id} aria-labelledby={`application-${item.id}`}>
+            <div className="application-copy">
+              <p className="section-kicker"><span>{String(index + 1).padStart(2, "0")}</span>{item.label}</p>
+              <h2 id={`application-${item.id}`}>{item.title}</h2>
+              <p className="application-description">{item.copy}</p>
+              <ul className="application-tags" aria-label="研究关键词">
+                {item.tags.map((tag) => <li key={tag}>{tag}</li>)}
+              </ul>
+            </div>
+            <figure className="application-media">
+              <div className="application-media-frame">
+                {item.kind === "video" ? (
+                  <video controls playsInline preload="metadata" aria-label={item.caption}>
+                    <source src={`${assetBase}/media/${encodeURIComponent(item.file)}`} type="video/mp4" />
+                    您的浏览器不支持视频播放。
+                  </video>
+                ) : (
+                  <Image src={`${assetBase}/media/${encodeURIComponent(item.file)}`} alt={item.caption} fill sizes="(max-width: 900px) 100vw, 55vw" style={{ objectFit: "contain" }} />
+                )}
+              </div>
+              <figcaption><span>{item.caption}</span><a href={`${assetBase}/media/${encodeURIComponent(item.file)}`} target="_blank" rel="noopener noreferrer">{item.kind === "video" ? "打开视频" : "查看原图"} ↗</a></figcaption>
+            </figure>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   const [page, setPage] = useState<PageKey>("home");
   const [selected, setSelected] = useState(featured[0]);
+  // add virtual condition
   const navigate = (key: PageKey) => { setPage(key); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const openParticle = (particle: Particle) => { setSelected(particle); navigate("model"); };
-  return <main><Header active={page} onNavigate={navigate} />{page === "home" && <HomePage onNavigate={navigate} />}{page === "browse" && <BrowsePage onSelect={openParticle} />}{page === "model" && <ModelPage particle={selected} setParticle={setSelected} />}{page === "classify" && <ClassIndexPage onSelect={openParticle} />}{page === "stats" && <StatsPage />}{page === "about" && <AboutPage />}<footer><div><span className="brand-en">LUPA Atlas</span><p>月壤颗粒三维形貌图谱</p></div><p>LUNAR REGOLITH<br />MORPHOLOGY ARCHIVE</p><span>© 2026</span></footer></main>;
+  return <main><Header active={page} onNavigate={navigate} />{page === "home" && <HomePage onNavigate={navigate} />}{page === "browse" && <BrowsePage onSelect={openParticle} />}{page === "model" && <ModelPage particle={selected} setParticle={setSelected} />}{page === "classify" && <ClassIndexPage onSelect={openParticle} />}{page === "stats" && <StatsPage />}{page === "about" && <AboutPage />}{page === "application" && <ApplicationPage />}<footer><div><span className="brand-en">LUPA Atlas</span><p>月壤颗粒三维形貌图谱</p></div><p>LUNAR REGOLITH<br />MORPHOLOGY ARCHIVE</p><span>© 2026</span></footer></main>;
 }
