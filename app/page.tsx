@@ -645,7 +645,7 @@ function ApplicationPage() {
             <figure className="application-media">
               <div className="application-media-frame">
                 {item.kind === "video" ? (
-                  <video controls playsInline preload="metadata" aria-label={t(item.caption)}>
+                  <video autoPlay loop muted controls playsInline preload="metadata" aria-label={t(item.caption)}>
                     <source src={`${assetBase}/media/${encodeURIComponent(item.file)}`} type="video/mp4" />
                     {t("您的浏览器不支持视频播放。")}
                   </video>
