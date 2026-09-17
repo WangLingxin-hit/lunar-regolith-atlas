@@ -572,22 +572,72 @@ function ClassIndexPage({ onSelect }: { onSelect: (particle: Particle) => void }
   );
 }
 
+const projectResearch: {
+  id: string;
+  title: TextKey;
+  copy: TextKey;
+  image: { file: string; width: number; height: number; caption: TextKey };
+  publication?: { title: string; doi: string };
+  toolkit?: { title: string; url: string };
+}[] = [
+  {
+    id: "segmentation",
+    title: "高精度分割与边界识别",
+    copy: "针对月壤 Micro-CT 扫描图像中的高频边界信号，开发了高精度分割算法，在边界识别精度上显著优于现有模型，最大程度还原月壤颗粒的表面形态。",
+    image: { file: "第一点配图.png", width: 998, height: 271, caption: "月壤 Micro-CT 图像分割与颗粒边界识别对比。" },
+    publication: { title: "Deeply Seeking Boundary for Lunar Regolith Segmentation", doi: "10.1609/aaai.v40i12.37994" },
+  },
+  {
+    id: "characterization",
+    title: "形状—纹理解耦与自动分类",
+    copy: "针对月壤颗粒形态表征，开发了基于形状—纹理解耦的开源定量表征框架。评估结果可支撑自动化颗粒分类，计算包也可集成至商用软件插件中。",
+    image: { file: "第二点配图.png", width: 1967, height: 935, caption: "基于形状—纹理解耦的颗粒形貌表征与分类框架。" },
+    publication: { title: "Morphology-based quantitative characterization and automatic classification of Chang’E-5 lunar regolith particles", doi: "10.1016/j.actaastro.2026.08.077" },
+    toolkit: { title: "LUPA · Lunar Regolith Particle Analyzer", url: "https://github.com/Catsup0059/LUPA-Lunar-Regolith-Particle-Analyzer" },
+  },
+  {
+    id: "engineering-properties",
+    title: "从颗粒分类走向工程物性推演",
+    copy: "批量化颗粒种类表征与分类，为未来宏观工程物理特性的推演提供支撑。",
+    image: { file: "第三点配图.png", width: 933, height: 422, caption: "颗粒群构建与堆积行为仿真示意。" },
+  },
+];
+
 function AboutPage() {
   const { t } = useLanguage();
   return (
     <section className="content-page about-page">
-      <PageIntro index="04" eyebrow="LUNAR PARTICLE ATLAS / 项目简介" title="月壤颗粒三维形貌图谱" copy="以数字模型呈现不同类别月壤颗粒的表面结构与形貌差异。" />
-      <div className="method-flow page-enter">
-        {([
-          ["01", "颗粒浏览", "按编号和类别检索月壤颗粒。"],
-          ["02", "三维观察", "通过旋转和缩放观察颗粒表面。"],
-          ["03", "多模式显示", "在表面、点云和线框视图之间切换。"],
-          ["04", "样本对比", "比较不同颗粒的整体轮廓与局部结构。"],
-        ] as const).map(([number, title, copy]) => <article key={number}><span>{number}</span><h2>{t(title)}</h2><p>{t(copy)}</p></article>)}
-      </div>
-      <div className="about-columns">
-        <article><p className="section-kicker">{t("形貌特征")}</p><h2>{t("观察颗粒的三维形貌")}</h2><p>{t("不同成因与演化过程会在颗粒轮廓、棱角和表面起伏中留下形貌特征。三维模型提供了更完整的空间观察视角。")}</p></article>
-        <article><p className="section-kicker">{t("样本集合")}</p><h2>{t("四类颗粒样本")}</h2><p>{t("图谱收录胶结物、玻璃珠、岩屑和单矿物四类颗粒，可通过编号索引快速切换和对照观察。")}</p></article>
+      <PageIntro index="04" eyebrow="LUNAR PARTICLE ATLAS / 项目简介" title="项目介绍与研究成果" copy="围绕真实月壤颗粒，开展高精度图像分割、形貌定量表征与自动分类，为宏观工程物性推演提供基础。" />
+      <div className="research-list">
+        {projectResearch.map((item, index) => {
+          const imageUrl = `${assetBase}/${encodeURIComponent(item.image.file)}`;
+          return (
+            <article className="research-section page-enter" key={item.id} aria-labelledby={`research-${item.id}`}>
+              <div className="research-heading">
+                <div><span className="folio-number">{String(index + 1).padStart(2, "0")}</span><h2 id={`research-${item.id}`}>{t(item.title)}</h2></div>
+                <p>{t(item.copy)}</p>
+              </div>
+              <figure className="research-figure">
+                <div className="research-image">
+                  <Image src={imageUrl} alt={t(item.image.caption)} width={item.image.width} height={item.image.height} sizes="(max-width: 720px) 100vw, 90vw" />
+                </div>
+                <figcaption><span>{t(item.image.caption)}</span><a href={imageUrl} target="_blank" rel="noopener noreferrer">{t("查看原图")} ↗</a></figcaption>
+              </figure>
+              {(item.publication || item.toolkit) && (
+                <dl className="research-resources">
+                  {item.publication && <div>
+                    <dt>{t("相关论文")}</dt>
+                    <dd><a href={`https://doi.org/${item.publication.doi}`} target="_blank" rel="noopener noreferrer"><cite lang="en">{item.publication.title}</cite> ↗</a><span className="research-doi">DOI: {item.publication.doi}</span></dd>
+                  </div>}
+                  {item.toolkit && <div>
+                    <dt>{t("开源计算包")}</dt>
+                    <dd><a href={item.toolkit.url} target="_blank" rel="noopener noreferrer" lang="en">{item.toolkit.title} ↗</a></dd>
+                  </div>}
+                </dl>
+              )}
+            </article>
+          );
+        })}
       </div>
     </section>
   );
