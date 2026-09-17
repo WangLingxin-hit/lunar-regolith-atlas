@@ -419,7 +419,11 @@ function Header({ active, onNavigate, onLanguageChange }: {
           <button lang="en" aria-label="English" aria-pressed={language === "en"} onClick={() => onLanguageChange("en")}>EN</button>
           <button lang="zh-CN" aria-label="中文" aria-pressed={language === "zh"} onClick={() => onLanguageChange("zh")}>中文</button>
         </div>
-        <Image className="header-team-logo" src={`${assetBase}/logo.jpg`} alt={t("地外资源勘查与利用团队标志")} title={t("地外资源勘查与利用团队标志")} width={54} height={54} />
+        <div className="header-logos">
+          <Image className="header-team-logo header-team-logo-round" src={`${assetBase}/logo.jpg`} alt={t("地外资源勘查与利用团队标志")} title={t("地外资源勘查与利用团队标志")} width={64} height={64} />
+          <Image className="header-team-logo" src={`${assetBase}/RCAMCLogo.png`} alt={t("RCAMC 团队标志")} title={t("RCAMC 团队标志")} width={64} height={64} />
+          <Image className="header-team-logo" src={`${assetBase}/AMLogo.png`} alt={t("宇航空间机构全国重点实验室标志")} title={t("宇航空间机构全国重点实验室标志")} width={64} height={64} />
+        </div>
       </div>
     </header>
   );

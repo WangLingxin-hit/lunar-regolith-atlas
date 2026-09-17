@@ -12,6 +12,8 @@ const english = {
   "主导航": "Main navigation",
   "切换语言": "Switch language",
   "地外资源勘查与利用团队标志": "Extraterrestrial Resources Exploration and Utilization team logo",
+  "RCAMC 团队标志": "RCAMC team logo",
+  "宇航空间机构全国重点实验室标志": "National Key Laboratory of Aerospace Mechanism logo",
   "数据浏览": "Browse Data",
   "三维模型": "3D Models",
   "分类索引": "Class Index",
