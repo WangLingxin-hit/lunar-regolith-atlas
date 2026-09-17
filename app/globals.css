@@ -23,6 +23,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, canvas:focus-vi
 .brand-rule { width: 1px; height: 30px; background: var(--line); }
 .brand-cn { color: #5d5d57; letter-spacing: .12em; font-family: "Songti SC", "Noto Serif SC", serif; }
 .header-controls { display: flex; align-items: center; gap: 28px; height: 100%; min-width: 0; }
+.header-team-logo { display: block; flex-shrink: 0; width: 54px; height: 54px; object-fit: contain; border-radius: 50%; }
 .language-switch { display: flex; flex-shrink: 0; border: 1px solid var(--line); }
 .language-switch button { border: 0; background: transparent; padding: 8px 10px; font-size: 12px; cursor: pointer; }
 .language-switch button[aria-pressed="true"] { color: white; background: var(--blue); }
@@ -228,10 +229,11 @@ footer > p { line-height: 1.7; letter-spacing: .16em; }
   .application-card { grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 32px 0; }
   .application-copy h2 { font-size: 24px; }
   .site-header { height: 68px; gap: 12px; padding: 0 20px; }
-  .header-controls { gap: 14px; }
+  .header-controls { gap: 8px; }
+  .header-team-logo { width: 36px; height: 36px; }
   .brand-en { font-size: 23px; }
-  .language-switch button { padding: 8px; }
-  .menu-button { display: flex; flex-direction: column; gap: 5px; border: 0; background: none; }
+  .language-switch button { padding: 8px 6px; }
+  .menu-button { display: flex; flex-direction: column; gap: 5px; padding: 0; border: 0; background: none; }
   .menu-button span { width: 25px; border-top: 1px solid var(--ink); }
   .nav { display: none; position: absolute; top: 68px; left: 0; right: 0; height: auto; padding: 10px 20px 22px; border-bottom: 1px solid var(--line); background: var(--paper-hi); flex-direction: column; align-items: stretch; gap: 0; }
   .nav.open { display: flex; }

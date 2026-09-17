@@ -11,6 +11,7 @@ const english = {
   "切换导航": "Toggle navigation",
   "主导航": "Main navigation",
   "切换语言": "Switch language",
+  "地外资源勘查与利用团队标志": "Extraterrestrial Resources Exploration and Utilization team logo",
   "数据浏览": "Browse Data",
   "三维模型": "3D Models",
   "分类索引": "Class Index",

@@ -419,6 +419,7 @@ function Header({ active, onNavigate, onLanguageChange }: {
           <button lang="en" aria-label="English" aria-pressed={language === "en"} onClick={() => onLanguageChange("en")}>EN</button>
           <button lang="zh-CN" aria-label="中文" aria-pressed={language === "zh"} onClick={() => onLanguageChange("zh")}>中文</button>
         </div>
+        <Image className="header-team-logo" src={`${assetBase}/logo.jpg`} alt={t("地外资源勘查与利用团队标志")} title={t("地外资源勘查与利用团队标志")} width={54} height={54} />
       </div>
     </header>
   );
@@ -584,14 +585,14 @@ const projectResearch: {
     id: "segmentation",
     title: "高精度分割与边界识别",
     copy: "针对月壤 Micro-CT 扫描图像中的高频边界信号，开发了高精度分割算法，在边界识别精度上显著优于现有模型，最大程度还原月壤颗粒的表面形态。",
-    image: { file: "第一点配图.png", width: 998, height: 271, caption: "月壤 Micro-CT 图像分割与颗粒边界识别对比。" },
+    image: { file: "first.png", width: 998, height: 271, caption: "月壤 Micro-CT 图像分割与颗粒边界识别对比。" },
     publication: { title: "Deeply Seeking Boundary for Lunar Regolith Segmentation", doi: "10.1609/aaai.v40i12.37994" },
   },
   {
     id: "characterization",
     title: "形状—纹理解耦与自动分类",
     copy: "针对月壤颗粒形态表征，开发了基于形状—纹理解耦的开源定量表征框架。评估结果可支撑自动化颗粒分类，计算包也可集成至商用软件插件中。",
-    image: { file: "第二点配图.png", width: 1967, height: 935, caption: "基于形状—纹理解耦的颗粒形貌表征与分类框架。" },
+    image: { file: "second.png", width: 1967, height: 935, caption: "基于形状—纹理解耦的颗粒形貌表征与分类框架。" },
     publication: { title: "Morphology-based quantitative characterization and automatic classification of Chang’E-5 lunar regolith particles", doi: "10.1016/j.actaastro.2026.08.077" },
     toolkit: { title: "LUPA · Lunar Regolith Particle Analyzer", url: "https://github.com/Catsup0059/LUPA-Lunar-Regolith-Particle-Analyzer" },
   },
@@ -599,7 +600,7 @@ const projectResearch: {
     id: "engineering-properties",
     title: "从颗粒分类走向工程物性推演",
     copy: "批量化颗粒种类表征与分类，为未来宏观工程物理特性的推演提供支撑。",
-    image: { file: "第三点配图.png", width: 933, height: 422, caption: "颗粒群构建与堆积行为仿真示意。" },
+    image: { file: "third.png", width: 933, height: 422, caption: "颗粒群构建与堆积行为仿真示意。" },
   },
 ];
 
